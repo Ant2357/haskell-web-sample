@@ -7,7 +7,22 @@ import qualified Network.Wai              as Wai
 import qualified Network.HTTP.Types       as HTypes
 
 main :: IO ()
-main = Warp.run 8000 helloApp
+main = Warp.run 8080 app
 
-helloApp :: Wai.Application
-helloApp req send = send $ Wai.responseBuilder HTypes.status200 [] "Welcome Haskell Web Page(´・ω・｀)"
+app :: Wai.Application
+app req send = send $ case Wai.rawPathInfo req of
+  "/" -> index
+  _   -> notFound
+
+index :: Wai.Response
+index = Wai.responseFile
+  HTypes.status200
+  [("Content-Type", "text/html")]
+  "index.html"
+  Nothing
+
+notFound :: Wai.Response
+notFound = Wai.responseLBS
+  HTypes.status404
+  [("Content-Type", "text/plain")]
+  "404 - Not Found"
